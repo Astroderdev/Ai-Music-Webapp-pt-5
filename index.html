@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css" integrity="sha512-T584yQ/tdRR5QwOpfvDfVQUidzfgc2339Lc8uBDtcp/wYu80d7jwBgAxbyMh0a9YM9F8N3tdErpFI8iaGx6x5g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Supermercado+One&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.min.js" integrity="sha512-NxocnqsXP3zm0Xb42zqVMvjQIktKEpTIbCXXyhBPxqGZHqhcOXHs4pXI/GoZ8lE+2NJONRifuBpi9DxC58L0Lw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js" integrity="sha512-WzkwpdWEMAY/W8WvP9KS2/VI6zkgejR4/KTxTl4qHx0utqeyVE0JY+S1DlMuxDChC7x0oXtk/ESji6a0lP/Tdg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+    <title>Music With AI</title>
+</head> 
+<style>
+    canvas{
+        margin-top: -150px;
+        border: 3px solid aquamarine;
+        border-radius: 10px;
+        box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+    }
+</style>
+<body style="background-size: cover; font-family: 'Supermercado One', cursive;" background="music bg.png">
+    <center>
+        <div class="Heading" style="background-color: aqua; padding: 3px; width: 700px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;" >
+            <p style="font-size: 20px;">Music With AI</p>
+            <p style="font-size: 15px;">Get Your Left Hand Wrist Up to Play Peter Pan Song and Get Your Right Hand Wrist Up to play Harry Poter Theme Song</p>
+            <p style="font-size: 15px;" id="song">Song Playing = </p>
+        </div>
+    </center>
+</body>
+
+<script>
+    var Leftscore = 0;
+    var Rightscore = 0;
+    var leftstatus = 0; 
+    var rightstatus = 0; 
+    var LeftX = 0;
+    var LeftY = 0;
+    var RightX = 0;
+    var RightY = 0;
+    var peter = "";
+    var harry = "";
+    function preload(){
+        peter = loadSound("peter pan.mp3");
+        harry = loadSound("harry potter.mp3");
+    }
+    function setup(){
+        canvas = createCanvas(400, 400);
+        canvas.center();
+        background("white");
+        video = createCapture(VIDEO);
+        video.hide();
+        poseNet = ml5.poseNet(video, modelLoaded);
+        poseNet.on('pose', gotPoses);
+    }
+    function modelLoaded(){
+        console.log("poseNet Is Initialized");
+    }
+    function gotPoses(results){
+
+        if(results.length > 0){
+            console.log(results);
+
+            var LeftX = results[0].pose.leftWrist.x;
+            var RightX = results[0].pose.rightWrist.x;
+            var LeftY = results[0].pose.leftWrist.y;
+            var RightY = results[0].pose.rightWrist.y;
+            var leftScore = results[0].pose.keypoints[9].score;
+            var rightScore = results[0].pose.keypoints[10].score;
+        }
+    }
+    function draw(){
+        image(video, 0, 0, 400, 400);
+        fill("red");
+        stroke("red");
+        leftstatus = peter.isPlaying();
+        rightstatus = harry.isPlaying();
+        if(leftScore > 0.2)
+        {
+            circle(LeftX, LeftY, 20);
+            harry.stop();
+            if(leftstatus = false)
+            {
+                peter.play();
+                document.getElementById("song").innerHTML = "Song Playing = Peter Pan"
+            }
+        }
+        
+        if(rightScore > 0.2){
+            circle(RightX, RightY, 20);
+            peter.stop();
+            if(leftstatus = false)
+            {
+                harry.play();
+                document.getElementById("song").innerHTML = "Song Playing = Harry Poter"
+            }
+        }
+        
+    }
+
+</script>
+</html>
